@@ -111,19 +111,57 @@
     
     
     // 1. Old way
-  
+
+    // select everything, even if it doesn't exist yet, so do selectAll()
+    // creates virtual list of things in circles that should exist but don't yet
+    let elements = demo.selectAll("circle")
+                       .data( circles );
     
+    console.log(elements);
+
+    
+
+    elements.enter()
+            .append("circle")
+            .attr("r", 20)
+    // merge brings back in everything that was already there 
+            .merge(elements)
+            .attr("cx", d => d['x'])
+            .attr("cy", d => d['y'])
+            .attr("fill", d => colorScale(d.age))
     
     
     // 2. New way - shorthand version
-    
+    // demo.selectAll("circle").data( circles )
+    //     .join( "circle" )
+    //     .attr("r", 20)
+    //     .attr("cx", d => d['x'])
+    //     .attr("cy", d => d['y'])
+    //     .attr("fill", d => colorScale(d.age))
     
        
        
     // 3. New way - extended version
     //  You'll use this one when you have custom behavior for circles being added, changed, or removed
     //     (a good example of this is animating when circles enter and exit the canvas -- we'll do something like this in coming weeks )
-    
+    demo.selectAll("circle").data( circles )
+        .join(
+          enter => {
+            enter.append("circle")
+                 .attr("r", 20)
+                 .attr("cx", d => d['x'])
+                 .attr("cy", d => d['y'])
+                 .attr("fill", "green")
+          },
+          update => {
+            update.attr("cx", d => d['x'])
+                  .attr("cy", d => d['y'])
+                  .attr("fill", d => colorScale(d.age))
+          },
+          exit => {
+            exit.remove();
+          }
+        )
     
        
                
@@ -215,19 +253,29 @@
     .attr("transform","translate("+margin.left+","+(chartHeight+margin.top+10)+")")
     .call(bottomGridlines);
     
-    
+    const genreScale = d3.scaleOrdinal( d3.schemeCategory10 );
+
+    chartArea.selectAll("circle").data(data)
+             .join("circle")
+             .attr("cx", d => yearScale(d['year']))
+             .attr("cy", d => grossScale(d['worldwide_gross']+1))
+             .attr("r", d => imdbScale(d['imdb_rating']))
+             .attr("opacity", 0.8)
+             .attr("label", d => d["title"])  
+             .style("fill", d => genreScale(d['Main_Genre']))
+
   
   // CONVERT TO USE A DATA JOIN
-  data.forEach( (d, i) => {
+  // data.forEach( (d, i) => {
     
-    let circle = chartArea.append("circle")
-        .attr("cx", yearScale(d['year']))
-        .attr("cy", grossScale(d['worldwide_gross']+1))
-        .attr("r", imdbScale(d['imdb_rating']))
-        .attr("opacity", 0.8)
-        .attr("label", d["title"])  
+  //   let circle = chartArea.append("circle")
+  //       .attr("cx", yearScale(d['year']))
+  //       .attr("cy", grossScale(d['worldwide_gross']+1))
+  //       .attr("r", imdbScale(d['imdb_rating']))
+  //       .attr("opacity", 0.8)
+  //       .attr("label", d["title"])  
 
-  });
+  // });
   // done with forEach
   
   
