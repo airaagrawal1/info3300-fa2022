@@ -93,11 +93,42 @@
              .call(leftGridlines);
 
   // X Axis
-  
+  const timeParser = d3.timeParse('%Y-%m-%d');
+  data.forEach( d => {
+    d['date'] = timeParser( d["String Date"]);
+  });
+
+  const dateExtent = d3.extent(data, d => d['date']);
+  const dateScale = d3.scaleTime().domain(dateExtent).range([0, chartWidth]);
+
+  let bottomAxis = d3.axisLeft(dateScale)
+  let bottomGridlines = d3.axisLeft(dateScale)
+                        .tickSize(-chartHeight-10)
+                        .tickFormat("")
+  annotations.append("g")
+             .attr("class", "x axis")
+             .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+             .call(bottomAxis)
+  annotations.append("g")
+             .attr("class", "x gridlines")
+             .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+             .call(bottomGridlines);
+
   
   // 3. Before we start drawing, we need a line generator
   //  this will help us to draw the path based on data, which otherwise is very complicated
-  
+  var lineGen = d3.line()
+                  .x( d => dateScale(d['date']) )
+                  .y( d => carbonScale(d['Carbon Dioxide (ppm)']) )
+                  .curve( d3.curveMonotoneX );
+
+  chartArea.append("path")
+           .datum(data)
+           .attr("class", "line")
+           .attr("fill", "none")
+           .attr("stroke", "steelblue")
+           .attr("stroke-width", 3)
+           .attr("d", lineGen);
   
   
   // 4. Append a <path>, bind the data, and run the generator 
