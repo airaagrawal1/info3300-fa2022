@@ -71,17 +71,126 @@
     .then( (yearData) => {
       
   console.log(yearData);
+
+  const data = yearData['All Years'];
   
   
   // To start: Make a single bar chart for one of the year ranges
+  const percentScale = d3.scaleLinear().domain([0, 1]).range([chartHeight, 0]);
+
+  // const genres = d3.map(data, d => d['genre']);
   
-  
-  
-  
+  // const genreScale = d3.scaleBand().domain(genres).range([0, chartWidth]).padding(0.05);
+
+  // const leftAxis = d3.axisLeft(percentScale).tickFormat(d3.format('.0%'));
+  // const leftGridlines = d3.axisLeft(percentScale).tickFormat('').tickSize(-chartWidth-10);
+  // annotations.append("g")
+  //            .attr("class", "y axis")
+  //            .attr("transform", `translate(${margin.left-10}, ${margin.top})`)
+  //            .call(leftAxis)
+  // annotations.append("g")
+  //            .attr("class", "y gridlines")
+  //            .attr("transform", `translate(${margin.left-10}, ${margin.top})`)
+  //            .call(leftGridlines)
+
+  // let bottomAxis = d3.axisBottom(genreScale);
+  // annotations.append("g")
+  //            .attr("class", "x axis")
+  //            .attr("transform", `translate(${margin.left}, ${chartHeight+margin.top+10})`)
+  //            .call(bottomAxis)
+
+  // // scale band returns left side of a bar, not the middle value
+  // chartArea.selectAll('rect.bar').data( data )
+  //          .join('rect')
+  //          .attr('class', 'bar')
+  //          .attr("fill", "steelblue")
+  //          .attr("x", d => genreScale(d['genre']))
+  //          .attr("y", d => percentScale(d['percentpass']))
+  //          // can also do for line below: .attr("height", d => percentScale(0) - percentScale(d['percentpass']))
+  //          .attr("height", d => chartHeight - percentScale(d['percentpass']))
+  //          .attr("width", genreScale.bandwidth());
+
   
   // Now add buttons and make interactive version
   
+  const allKeys = Object.keys(yearData).sort();
+  console.log(allKeys);
+
+  allKeys.forEach( d => {
+    console.log(d)
+    d3.select("div#button-bar")
+      .append("button")
+      .text(d)
+      .on("click", function() {
+        updateBars(d);
+      });
+  });
+
+  const genres = d3.map(data, d => d['genre']);
   
+  const genreScale = d3.scaleBand().domain(genres).range([0, chartWidth]).padding(0.05);
+
+  const leftAxis = d3.axisLeft(percentScale).tickFormat(d3.format('.0%'));
+  const leftGridlines = d3.axisLeft(percentScale).tickFormat('').tickSize(-chartWidth-10);
+  annotations.append("g")
+             .attr("class", "y axis")
+             .attr("transform", `translate(${margin.left-10}, ${margin.top})`)
+             .call(leftAxis)
+  annotations.append("g")
+             .attr("class", "y gridlines")
+             .attr("transform", `translate(${margin.left-10}, ${margin.top})`)
+             .call(leftGridlines)
+
+  let bottomAxis = d3.axisBottom(genreScale);
+  let bottomAxisG = annotations.append("g")
+                              .attr("class", "x axis")
+                              .attr("transform", `translate(${margin.left}, ${chartHeight+margin.top+10})`)
+                              .call(bottomAxis)
+  
+  function updateBars(yearKey) {
+    const data = yearData[yearKey];
+
+    const genres = d3.map(data, d => d['genre']);
+  
+    const genreScale = d3.scaleBand().domain(genres).range([0, chartWidth]).padding(0.05);
+
+    bottomAxis.scale(genreScale);
+    // animated version
+    bottomAxisG.transition().call(bottomAxis);
+    // basic version: bottomAxisG.call(bottomAxis);
+
+    // chartArea.selectAll('rect.bar').data( data )
+    //        .join('rect')
+    //        .attr('class', 'bar')
+    //        .attr("fill", "steelblue")
+    //        .attr("x", d => genreScale(d['genre']))
+    //        .attr("y", d => percentScale(d['percentpass']))
+    //        // can also do for line below: .attr("height", d => percentScale(0) - percentScale(d['percentpass']))
+    //        .attr("height", d => chartHeight - percentScale(d['percentpass']))
+    //        .attr("width", genreScale.bandwidth());
+
+    chartArea.selectAll('rect.bar').data( data )
+            .join(
+              enter => enter.append('rect')
+                            .attr('class', 'bar')
+                            .attr("fill", "steelblue")
+                            .attr("x", d => genreScale(d['genre']))
+                            .attr("y", d => percentScale(d['percentpass']))
+                            .attr("height", d => chartHeight - percentScale(d['percentpass']))
+                            .attr("width", genreScale.bandwidth())
+                            .attr("opacity", 0)
+                            .call(enter => enter.transition().attr("opacity", 1)),
+              update => update.call(update => update.transition())
+            )
+            .attr('class', 'bar')
+            .attr("fill", "steelblue")
+            .attr("x", d => genreScale(d['genre']))
+            .attr("y", d => percentScale(d['percentpass']))
+            .attr("height", d => chartHeight - percentScale(d['percentpass']))
+            .attr("width", genreScale.bandwidth());
+  }
+
+  updateBars('All Years');
   
   
   // Stretch goal: Animate it!
