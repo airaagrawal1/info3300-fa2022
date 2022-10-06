@@ -15,8 +15,14 @@
   
   <style>
   
-  
-  
+  .state {
+    fill:lightgrey;
+  }
+  .outline {
+    fill: none;
+    stroke: black;
+    stroke-width: 1px;
+  }
   
 
   </style>
@@ -69,12 +75,20 @@
                   .attr("transform","translate("+margin.left+","+margin.top+")");
                   
   // 0. Let's explore a new way to use promises for data imports that might be a bit cleaner when importing lots of files
-  
-  
+
+  // const testFunc = async function() {
+
+  //   const data = await d3.csv("../datasets/us-smaller.json");
+  //   console.log(data);
+
+  // }
+  // testFunc();
   
   
   
   // 1. An async function to load data and build the map
+
+  const requestData = async function() {
   
   
     // 2. Draw a map of US using topoJSON
@@ -82,10 +96,28 @@
     // Care of Mike Bostock:
     //   "../datasets/us-smaller.json"
     
-    
+    var us = await d3.json("../datasets/us-smaller.json")
+    console.log(us);
+
+    var states = topojson.feature(us, us.objects.states);
+    console.log(states);
+
+    // one massive path that is every single state outline in the map --> higher fidelity and things don't weirdly overlap
+    let stateMesh = topojson.mesh(us, us.objects.states);
+
+    const projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+    const path = d3.geoPath().projection(projection);
   
     // 2b. Pick out topographic features and build d3 helpers
+    map.selectAll("path.state").data(states.features)
+        .join("path")
+        .attr("class", "state")
+        .attr("note", d=> d.id)
+        .attr("d", path)
     
+    map.append("path").datum(statesMesh)
+        .attr("class", "outline")
+        .attr("d", path);
     
     
     
@@ -167,8 +199,8 @@
     function mouseLeavesPlot() {
     }
     
-    
-    
+  }
+  requestData();
     
     
     
