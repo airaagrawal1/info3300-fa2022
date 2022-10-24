@@ -131,7 +131,35 @@
              .attr("opacity", 0.8)
              .style("fill", d => regScale(d.Region));
     
-    
+    var plotZoom = d3.zoom().on("zoom", plotZoomed);
+
+    plot.call(plotZoom);
+
+    function plotZoomed(event) {
+      viewport.attr("transform", event.transform)
+
+      // update dridlines/axes
+      xAxis.scale(event.transform.rescaleX(xScale))
+      yAxis.scale(event.transform.rescaleY(yScale))
+
+      xGridlines.scale(event.transform.rescaleX(xScale))
+      yGridlines.scale(event.transform.rescaleY(yScale))
+
+      d3.select("g.x.axis").call(xAxis);
+      d3.select("g.y.axis").call(yAxis);
+      d3.select("g.x.gridlines").call(xGridlines);
+      d3.select("g.y.gridlines").call(yGridlines);
+
+      // hide stuff that's out of bounds
+      plot.append("defs").append("clipPath")
+                        .attr("id", "chartClip")
+                        .append("rect").attr("x", 0)
+                                      .attr("y", 0)
+                                      .attr("width", chartWidth)
+                                      .attr("height", chartHeight);
+
+      chartArea.attr("clip-path")
+    }
     
 
   }
