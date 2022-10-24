@@ -36,30 +36,25 @@
 
   <h5>HTML for today:</h5>
 
-  <svg id="all-passengers" height="200" width="600" style="background: #sff; margin-top:50px" >
-  </svg>
-  <div>
-  <button id="play">Play</button>
-  <button id="stop">Stop</button>
-  <button id="tick">Tick</button>
-  <button id="rand">Randomize</button>
-  </div>
+    <svg id="all-passengers" height="200" width="600" style="background: #fff; margin-top:50px">
+    </svg>
+    <div>
+      <button id="play">Play</button>
+      <button id="stop">Stop</button>
+      <button id="tick">Tick</button>
+      <button id="rand">Randomize</button>
+    </div>
 
-  <svg id="by-class" height="400" width="600" style="background: #fff; margin-top:50px" >
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-  <pre>
-    <code id="display2" class="hljs javascript">
-    </code>
-  </pre>
-
-  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+    <pre>
+      <code id="display2" class="hljs javascript">
+      </code>
+    </pre> 
 
     <script id="notes1">
     
@@ -104,9 +99,28 @@
 
 
       // --- Notes from class ---
+      passengers = passengers.slice(0, 200);
+
+      let circles = allLayer.selectAll("circle").data(passengers)
+                            .join("circle")
+                            .attr("r", 2)
+                            .attr("cx", d => d.x)
+                            .attr("cy", d => d.y)
+                            .attr("fill", d => mortalityScale(d.mortality));
       
+      var passengerSimulation = d3.forceSimulation()
+                                  .nodes(passengers)
+                                  .force("ypos", d3.forceY().strength(0.05).y(allHeight/2.0))
+                                  .force("xpos", d3.forceX().strength(0.05).x(d => ageScale(d.age)))
+                                  .force("collision", d3.forceCollide().radius(2).iterations(2))
+                                  .on("tick", updateAllPassengerPositions);
+
+      passengerSimulation.stop()
       
-      
+      // this function is gonna be called a lot so wanna avoid calling selectAll every time
+      function updateAllPassengerPositions() {
+        circles.attr("cx", d => d.x).attr("cy", d => d.y)
+      }
       
       
       
