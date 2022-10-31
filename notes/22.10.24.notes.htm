@@ -36,7 +36,7 @@
 
   <h5>HTML for today:</h5>
 
-  <svg id="all-passengers" height="200" width="600" style="background: #sff; margin-top:50px" >
+  <svg id="all-passengers" height="200" width="600" style="background: #fff; margin-top:50px" >
   </svg>
   <div>
   <button id="play">Play</button>
@@ -45,7 +45,7 @@
   <button id="rand">Randomize</button>
   </div>
 
-  <svg id="by-class" height="400" width="600" style="background: #fff; margin-top:50px" >
+  <svg id="by-class" height="400" width="600" style="background: #fff; margin-top:50px" ></svg>
 
 
   <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
@@ -142,8 +142,6 @@
       
       
       
-      
-      
       // Handle the buttons provided in the HTML
       d3.select("#play").on("click", () => {
         // Start animating the simulation
@@ -155,10 +153,18 @@
       });
       d3.select("#tick").on("click", () => {
         // Move the simulation one "tick"
-        
+        passengerSimulation.tick();
+        updateAllPassengerPositions();
       });
       d3.select("#rand").on("click", () => {
         // Randomize positions and restart the simulation
+        passengerSimulation.restart();
+        passengerSimulation.stop();
+        passengerSimulation.alpha(1);
+        passengers.forEach(d => {
+          d.x = d3.randomUniform(10,allWidth-10)();
+          d.y = d3.randomUniform(10,allHeight-10)();
+        });
       });
 
 
